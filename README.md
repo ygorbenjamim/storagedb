@@ -77,7 +77,7 @@ try {
 
 ### Clone
 
-Ao clonar uma tabela, é necessário informar um nome para a tabela local e enviar a lista de dados presente na mesma.
+Para clonar uma tabela, é necessário informar um nome para a tabela local e enviar a lista de dados presente na mesma.
 
 ```js
 fetch("https://dummyjson.com/products?limit=100")
