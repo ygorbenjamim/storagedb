@@ -1,10 +1,11 @@
+import { DUPLICATE_ID, INVALID_TABLE_NAME } from "../constants/texts";
 import {
   checkDuplicatesIDs,
   isValidTableName,
   parseCaptalize,
   validateIfTheTableExists,
+  checkIdInList,
 } from "../utils";
-import { checkIdInList } from "../utils/checkIdInList";
 
 const useStorageDB = (storage: any) => {
   /**
@@ -13,11 +14,32 @@ const useStorageDB = (storage: any) => {
    * @example
    *  create('user');
    */
-  const create = (tableName: string) => {
-    if (!isValidTableName(tableName))
-      throw new Error("Nome inválido para a tabela");
+  const create = async (tableName: string) => {
+    if (!isValidTableName(tableName)) throw new Error(INVALID_TABLE_NAME);
 
-    storage.setItem(`@table${parseCaptalize(tableName)}`, "[]");
+    // Camada de serviço
+    await storage.setItem(`@table${parseCaptalize(tableName)}`, "[]");
+  };
+
+  /**
+   * Clonar tabela do banco de dados
+   * @param tableName Nome da tabela
+   * @param tableData Lista de dados da tabela
+   * @example
+   *  clone('user', [
+   *    {id: '1', name: 'Alan'},
+   *    {id: '2', name: 'Jhon'},
+   *    {id: '3', name: 'Jimy'}
+   *  ]);
+   */
+  const clone = async (tableName: string, tableData: any[]) => {
+    if (!isValidTableName(tableName)) throw new Error(INVALID_TABLE_NAME);
+
+    // Camada de serviço
+    await storage.setItem(
+      `@table${parseCaptalize(tableName)}`,
+      JSON.stringify(tableData)
+    );
   };
 
   /**
@@ -28,14 +50,15 @@ const useStorageDB = (storage: any) => {
    * @example
    *  insert<IUser>('user', {id: '1', name: 'Alan'});
    */
-  const insert = <T extends {}>(tableName: string, values: T) => {
+  const insert = async <T extends {}>(tableName: string, values: T) => {
     const tableData = validateIfTheTableExists(tableName);
 
     tableData.push(values);
 
-    if (checkDuplicatesIDs(tableData)) throw new Error("Id duplicado");
+    if (checkDuplicatesIDs(tableData)) throw new Error(DUPLICATE_ID);
 
-    storage.setItem(
+    // Camada de serviço
+    await storage.setItem(
       `@table${parseCaptalize(tableName)}`,
       JSON.stringify(tableData)
     );
@@ -79,7 +102,7 @@ const useStorageDB = (storage: any) => {
    * @example
    *  update('user', '1', {id: '1', name: 'João'});
    */
-  const update = <T extends {}>(
+  const update = async <T extends {}>(
     tableName: string,
     id: string | number,
     values: T
@@ -94,9 +117,10 @@ const useStorageDB = (storage: any) => {
       return item;
     });
 
-    if (checkDuplicatesIDs(tableUpdated)) throw new Error("Id duplicado");
+    if (checkDuplicatesIDs(tableUpdated)) throw new Error(DUPLICATE_ID);
 
-    storage.setItem(
+    // Camada de serviço
+    await storage.setItem(
       `@table${parseCaptalize(tableName)}`,
       JSON.stringify(tableUpdated)
     );
@@ -111,20 +135,21 @@ const useStorageDB = (storage: any) => {
    * @example
    *  del('user', '1');
    */
-  const del = (tableName: string, id: string | number) => {
+  const del = async (tableName: string, id: string | number) => {
     const tableData = validateIfTheTableExists(tableName);
 
     checkIdInList(id, tableName);
 
     const tableDataUpdated = tableData.filter((item: any) => item.id !== id);
 
-    storage.setItem(
+    // Camada de serviço
+    await storage.setItem(
       `@table${parseCaptalize(tableName)}`,
       JSON.stringify(tableDataUpdated)
     );
   };
 
-  return { create, insert, select, update, del };
+  return { create, clone, insert, select, update, del };
 };
 
 export default useStorageDB;
