@@ -18,7 +18,7 @@ function App() {
       .then((json) => setData(json.products));
   }, []);
 
-  /* useEffect(() => {
+  useEffect(() => {
     try {
       create("user");
       insert("user", user1);
@@ -29,20 +29,20 @@ function App() {
         ...user1,
         email: "ygorbenjamim@email.com",
       });
-      console.log("Select: ", select("user"));
+      console.log("Select user: ", select("user"));
     } catch (e) {
       console.log((e as Error).message);
     }
-  }, []); */
+  }, []);
 
   const handleClone = () => {
     if (!data) return;
-    clone("produto", data);
+    clone("product", data);
   };
 
   const handleSelect = () => {
     try {
-      console.log(select("produto"));
+      console.log("select product: ", select("product"));
     } catch (e) {
       console.log((e as Error).message);
     }
@@ -52,7 +52,6 @@ function App() {
     <div>
       <h1>Empty</h1>
       <button onClick={handleClone}>Clonar</button>
-      <button>Sincronizar</button>
       <button onClick={handleSelect}>Buscar dados</button>
     </div>
   );
